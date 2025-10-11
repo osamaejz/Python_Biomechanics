@@ -9,8 +9,8 @@ class Process:
         EMG = scipy.io.loadmat(EMG_File)
         Kin = scipy.io.loadmat(Kin_File)
 
-        EMG_data = EMG[EMG_File[0:-4]]
-        Kin_data = Kin[Kin_File[0:-4]]
+        EMG_data = EMG[EMG_File[10:-4]]
+        Kin_data = Kin[Kin_File[10:-4]]
 
         EMG_data = [np.array(cell) for cell in EMG_data[0]]
         Kin_data = [np.array(cell) for cell in Kin_data[0]]
@@ -106,12 +106,13 @@ class Process:
             end = start + window_size
             emg_w = emg[:, start:end]               # (n_channels, window_size)
             emg_w_t = emg_w.T                       # (window_size, n_channels)
-
+            # print("EMG size after slice and transpose: ", np.shape(emg_w_t))
             if add_features:
                 feats = Process.extract_time_features(emg_w)          # (n_channels*5,)
                 feats_tiled = np.tile(feats, (window_size, 1))       # (window_size, n_channels*5)
                 emg_w_t = np.concatenate([emg_w_t, feats_tiled], axis=1)
 
+            # print("EMG after feature: ", np.shape(emg_w_t))
             emg_windows.append(emg_w_t)
 
             if return_sequences:
@@ -121,5 +122,6 @@ class Process:
                 kin_windows.append( kin[center] if center < len(kin) else 0.0 )
 
         emg_windows = np.array(emg_windows)     # (n_windows, window_size, n_features)
+        # print("EMG window Size in Dataprocess: ", np.shape(emg_windows))
         kin_windows = np.array(kin_windows)     # (n_windows, window_size) or (n_windows,)
         return emg_windows, kin_windows
